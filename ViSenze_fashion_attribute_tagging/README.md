@@ -1,4 +1,4 @@
-# Visenze-Solutions-Integration
+# ViSenze-fashion-attribute-tagging
 
 This python script creates a scheduled job to output fashion attributes into a CSV file using API /recognize method. It does the following: 
 1. Identify all image files given a folder path

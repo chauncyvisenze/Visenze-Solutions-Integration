@@ -7,6 +7,9 @@ import pandas as pd
 import os
 import glob
 import argparse
+import time
+
+
 
 # Add flags to the program
 parser = argparse.ArgumentParser(description='ViSenze recognition fashion attribute tagging')
@@ -23,6 +26,7 @@ args = parser.parse_args()
 def process_response(res):
     jd = json.loads(res.text)
     return jd['result'][0]['objects']
+
 
 # Parse ViSenze /recognize API response
 
@@ -48,8 +52,11 @@ def parse_tag(tag_dict):
 def output_to_csv(tag_list):
     df = pd.DataFrame(tag_list)
     cols = list(df)
-    cols.insert(0, cols.pop(cols.index('filename')))
-    cols.insert(1, cols.pop(cols.index('category')))
+    try:
+        cols.insert(0, cols.pop(cols.index('filename')))
+        cols.insert(1, cols.pop(cols.index('category')))
+    except Exception as e:
+        print('Error while inserting: ', e)
     df = df.loc[:, cols]
     return df
 
@@ -57,7 +64,7 @@ def output_to_csv(tag_list):
 # Given a folder path, call ViSenze /recognize API response to obtain fashion attributes
 
 
-def visenze_fashion_attribute(folder_path,access_key,secret_key, output_path):
+def visenze_fashion_attribute(folder_path,access_key,secret_key,output_path):
     tag_dict = {}
 
     url = "https://virecognition.visenze.com/v1/image/recognize"
@@ -65,22 +72,34 @@ def visenze_fashion_attribute(folder_path,access_key,secret_key, output_path):
 
     index = 0
     print('Starting recognition...')
+
+    if len(glob.glob(os.path.join(folder_path, '*g'))) == 0:
+        print ('No Images are in this folder. Please check again...')
+        return
+
     for filename in glob.glob(os.path.join(folder_path, '*g')):
-        data = {'file':open(filename,'rb'),
-                'tag_group':"fashion_attributes",
-                'vtt_source':"visenze_admin"
+        file = open(filename, 'rb')
+        data = {'file': file,
+                'tag_group':"fashion_attributes"
                 }
-        print ('Waiting for recognition response for file #{}...'.format(index))
-        res = requests.post(url=url,auth=auth,files=data)
-        print ('Retrieved recognition response for file #{}...'.format(index))
-        tag_dict[filename] = process_response(res)
+        print('Waiting for recognition response for file #{}...'.format(index))
+        try:
+            res = requests.post(url=url,auth=auth,files=data)
+            print('Retrieved recognition response for file #{}...'.format(index))
+            tag_dict[filename[len(folder_path)+1:]] = process_response(res)
+            print ('Removing file: ', filename)
+            file.close()
+            os.remove(filename)
+        except Exception as e:
+            print('The recognition failed for file #{0}: {1}'.format(index, json.loads(res.text)['error']))
         index += 1
 
     print('Parsing all responses...')
     tag_list = parse_tag(tag_dict)
     df = output_to_csv(tag_list)
-    df.to_csv(output_path, encoding='utf-8', index=False)
-    print ('Finished!')
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+    df.to_csv(timestr + "_" + output_path, encoding='utf-8', index=False)
+    print('Finished!')
 
 
 if __name__ == '__main__':

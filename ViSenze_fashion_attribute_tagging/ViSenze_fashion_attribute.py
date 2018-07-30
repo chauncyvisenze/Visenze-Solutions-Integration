@@ -89,6 +89,7 @@ def visenze_fashion_attribute(folder_path,access_key,secret_key,output_path):
             tag_dict[filename[len(folder_path)+1:]] = process_response(res)
             print ('Removing file: ', filename)
             file.close()
+            # Delete the image file after it's been successfully tagged
             os.remove(filename)
         except Exception as e:
             print('The recognition failed for file #{0}: {1}'.format(index, json.loads(res.text)['error']))

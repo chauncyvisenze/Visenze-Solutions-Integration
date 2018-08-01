@@ -72,7 +72,7 @@ def visenze_fashion_attribute(folder_path,access_key,secret_key,output_path):
     print('Starting recognition...')
 
     if len(glob.glob(os.path.join(folder_path, '*g'))) == 0:
-        print ('No Images are in this folder. Please check again...')
+        print('No Images are in this folder. Please check again...')
         return
 
     for filename in glob.glob(os.path.join(folder_path, '*g')):
@@ -85,7 +85,7 @@ def visenze_fashion_attribute(folder_path,access_key,secret_key,output_path):
             res = requests.post(url=url,auth=auth,files=data)
             print('Retrieved recognition response for file #{}...'.format(index))
             tag_dict[filename[len(folder_path)+1:]] = process_response(res)
-            print ('Removing file: ', filename)
+            print('Removing file: ', filename)
         except Exception as e:
             print('The recognition failed for file #{0}: {1}'.format(index, json.loads(res.text)['error']))
         index += 1

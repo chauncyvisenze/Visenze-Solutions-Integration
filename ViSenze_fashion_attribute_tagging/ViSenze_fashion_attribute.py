@@ -85,7 +85,6 @@ def visenze_fashion_attribute(folder_path,access_key,secret_key,output_path):
             res = requests.post(url=url,auth=auth,files=data)
             print('Retrieved recognition response for file #{}...'.format(index))
             tag_dict[filename[len(folder_path)+1:]] = process_response(res)
-            print('Removing file: ', filename)
         except Exception as e:
             print('The recognition failed for file #{0}: {1}'.format(index, json.loads(res.text)['error']))
         index += 1
@@ -94,7 +93,7 @@ def visenze_fashion_attribute(folder_path,access_key,secret_key,output_path):
     tag_list = parse_tag(tag_dict)
     df = output_to_csv(tag_list)
     timestr = time.strftime("%Y%m%d-%H%M%S")
-    df.to_csv(timestr + "_" + output_path, encoding='utf-8', index=False)
+    df.to_csv(output_path + timestr + '.csv', encoding='utf-8', index=False)
     print('Finished!')
 
 

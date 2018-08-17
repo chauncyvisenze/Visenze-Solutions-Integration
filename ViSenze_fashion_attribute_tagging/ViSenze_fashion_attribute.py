@@ -93,7 +93,7 @@ def visenze_fashion_attribute(folder_path,access_key,secret_key,output_path):
     tag_list = parse_tag(tag_dict)
     df = output_to_csv(tag_list)
     timestr = time.strftime("%Y%m%d-%H%M%S")
-    df.to_csv(output_path + timestr + '.csv', encoding='utf-8', index=False)
+    df.to_csv(output_path + '_' + timestr + '.csv', encoding='utf-8', index=False)
     print('Finished!')
 
 
